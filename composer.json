@@ -1,0 +1,18 @@
+{
+  "repositories": [
+    {
+      "type": "composer",
+      "url": "https://wpackagist.org"
+    }
+  ],
+  "require": {
+    "wpackagist-plugin/elementor": "*",
+    "wpackagist-plugin/query-monitor": "*",
+    "wpackagist-theme/bootstrap-basic4": "*"
+  },
+  "config": {
+    "allow-plugins": {
+      "composer/installers": false
+    }
+  }
+}

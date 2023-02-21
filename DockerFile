@@ -1,0 +1,25 @@
+FROM composer/composer:latest as build
+
+# Install composer
+WORKDIR /var/www/html
+
+RUN curl -sS https://getcomposer.org/installer | \
+    php -- --install-dir=/usr/bin/ --filename=composer
+
+COPY composer.json /var/www/html
+
+RUN composer config --no-plugins allow-plugins.composer/installers true
+
+# COPY composer.lock ./
+RUN composer install --no-scripts --no-autoloader
+# COPY ./ /var/www/
+RUN composer dump-autoload --optimize
+
+FROM wordpress:latest
+
+# COPY /vendor /var/www/html/wp-content
+
+COPY --from=build /var/www/html/wp-content /var/www/html/wp-content
+
+# Expose a port to run on
+EXPOSE 80

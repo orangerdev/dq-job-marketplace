@@ -1,0 +1,56 @@
+version: '3.3'
+services:
+  wordpress:
+    container_name: dqjm-wp
+    build:
+      context: .
+      dockerfile: DockerFile
+    ports:
+      - '80:80'
+    restart: always
+    working_dir: /var/www/html
+    volumes:
+      - ./app/plugins/dq-job-marketplace:/var/www/html/wp-content/plugins/dq-job-marketplace
+      - ./app/themes/dq-job-marketplace:/var/www/html/wp-content/themes/dq-job-marketplace
+      - ./app/uploads:/var/www/html/wp-content/uploads
+      - ./config/wp/error-logging.ini:/usr/local/etc/php/conf.d/error-logging.ini
+      - ./config/wp/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
+    environment:
+      - WORDPRESS_DEBUG=true
+      - WORDPRESS_DEBUG_DISPLAY=true
+      - WORDPRESS_DEBUG_LOG=false
+      - WORDPRESS_DB_HOST=database
+      - WORDPRESS_DB_USER=dqjm
+      - WORDPRESS_DB_PASSWORD=N50lDd3nNCgxGKlsmNx2s
+      - WORDPRESS_DB_NAME=dqjm
+    depends_on:
+      - database
+  database:
+    container_name: dqjm-db
+    image: mariadb:latest
+    command: '--default-authentication-plugin=mysql_native_password'
+    volumes:
+      - data_db_dqjm:/var/lib/mysql
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=SehgUvaIgWyY1SWpE6mhTw0s5rikoxpi
+      - MYSQL_DATABASE=dqjm
+      - MYSQL_USER=dqjm
+      - MYSQL_PASSWORD=N50lDd3nNCgxGKlsmNx2s
+  phpmyadmin:
+    container_name: dqjm-phpmyadmin
+    image: phpmyadmin/phpmyadmin:latest
+    restart: always
+    depends_on:
+      - database
+    environment:
+      PMA_HOST: database
+      PMA_USER: dqjm
+      PMA_PASSWORD: N50lDd3nNCgxGKlsmNx2s
+    ports:
+      - '8080:80'
+networks:
+  default:
+    name: dq-job-marketplace
+volumes:
+  data_db_dqjm: {}
