@@ -161,10 +161,15 @@ class Dcjb
     $user = new DCJB\Admin\User($this->get_plugin_name(), $this->get_version());
 
     $this->loader->add_action('init', $user, 'register_roles', 10);
+    $this->loader->add_filter('manage_users_columns', $user, 'add_columns', 10);
+    $this->loader->add_filter('manage_users_custom_column', $user, 'add_columns_content', 10, 3);
 
     $job = new DCJB\Admin\Job($this->get_plugin_name(), $this->get_version());
 
+    $this->loader->add_action('rest_api_init', $job, 'register_rest_routes', 10);
     $this->loader->add_action('init', $job, 'register_post_type', 10);
+    $this->loader->add_filter('manage_' . DCJB_CPT_JOB . '_posts_columns', $job, 'add_columns', 10);
+    $this->loader->add_action('manage_' . DCJB_CPT_JOB . '_posts_custom_column', $job, 'add_columns_content', 10, 2);
   }
 
   /**
@@ -179,6 +184,7 @@ class Dcjb
 
     $public = new DCJB\Front($this->get_plugin_name(), $this->get_version());
 
+    $this->loader->add_action('wp_enqueue_scripts', $public, 'enqueue_scripts', 10);
     $this->loader->add_filter('the_content', $public, 'display_apply_button', 999);
   }
 

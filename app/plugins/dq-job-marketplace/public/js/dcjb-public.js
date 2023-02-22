@@ -1,32 +1,42 @@
-(function( $ ) {
-	'use strict';
+(function ($) {
+  'use strict';
 
-	/**
-	 * All of the code for your public-facing JavaScript source
-	 * should reside in this file.
-	 *
-	 * Note: It has been assumed you will write jQuery code here, so the
-	 * $ function reference has been prepared for usage within the scope
-	 * of this function.
-	 *
-	 * This enables you to define handlers, for when the DOM is ready:
-	 *
-	 * $(function() {
-	 *
-	 * });
-	 *
-	 * When the window is loaded:
-	 *
-	 * $( window ).load(function() {
-	 *
-	 * });
-	 *
-	 * ...and/or other possibilities.
-	 *
-	 * Ideally, it is not considered best practise to attach more than a
-	 * single DOM-ready or window-load handler for a particular page.
-	 * Although scripts in the WordPress core, Plugins and Themes may be
-	 * practising this, we should strive to set a better example in our own work.
-	 */
+  $(document).ready(function () {
+    $('.apply-the-job').on('click', function (e) {
+      e.preventDefault();
 
-})( jQuery );
+      const button = $(this),
+        jobId = button.data('job');
+
+      jQuery.ajax({
+        url: dcjb.rest.apply_job,
+        type: 'POST',
+        data: {
+          job_id: jobId,
+        },
+        beforeSend: function (xhr) {
+          xhr.setRequestHeader('X-WP-Nonce', dcjb.rest.nonce);
+          button
+            .find('.fa-spin')
+            .removeClass('d-none')
+            .parent()
+            .find('span')
+            .text('Applying...');
+        },
+        success: function (response) {
+          if (response.success) {
+            button
+              .find('.fa-spin')
+              .addClass('d-none')
+              .parent()
+              .attr('disabled', true)
+              .removeClass('btn-primary apply-the-job')
+              .addClass('btn-warning')
+              .find('span')
+              .text('Applied!');
+          }
+        },
+      });
+    });
+  });
+})(jQuery);

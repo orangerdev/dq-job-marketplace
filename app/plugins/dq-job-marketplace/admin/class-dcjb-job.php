@@ -2,6 +2,8 @@
 
 namespace DCJB\Admin;
 
+use WP_REST_Response;
+
 /**
  * The admin-specific functionality of the plugin.
  *
@@ -58,6 +60,35 @@ class Job
   }
 
   /**
+   * Register REST routes related to job post type
+   * Hooked via action rest_api_init, priority 10
+   * @since   1.0.0
+   * @return  void
+   */
+  public function register_rest_routes()
+  {
+    register_rest_route(
+      'dcjb/v1',
+      'apply-job',
+      array(
+        'methods' => 'POST',
+        'callback' => array($this, 'apply_job'),
+        'permission_callback' => function () {
+          return is_user_logged_in() && current_user_can('apply_job');
+        },
+        'args' => array(
+          'job_id' => array(
+            'required' => true,
+            'validate_callback' => function ($param, $request, $key) {
+              return is_numeric($param) && !empty($param);
+            }
+          )
+        )
+      )
+    );
+  }
+
+  /**
    * Register custom post type
    * Hooked via action init, priority 10
    * @since 1.0.0
@@ -103,5 +134,87 @@ class Job
     );
 
     register_post_type(DCJB_CPT_JOB, $args);
+  }
+
+  /**
+   * Apply a job method
+   * Requested from dcjs/v1/apply-job
+   * @since 1.0.0
+   * @return void;
+   */
+  public function apply_job(\WP_REST_Request $request)
+  {
+    $params = $request->get_body_params();
+    $job_id = absint($params['job_id']);
+
+    $jobs_applied = get_user_meta(get_current_user_id(), 'jobs_applied', true);
+    $users_applied = get_post_meta($job_id, 'users_applied', true);
+
+    $users_applied = is_array($users_applied) ? $users_applied : [];
+    $jobs_applied = is_array($jobs_applied) ? $jobs_applied : [];
+
+    $jobs_applied[] = $job_id;
+    $users_applied[] = get_current_user_id();
+
+    update_user_meta(get_current_user_id(), 'jobs_applied', $jobs_applied);
+    update_post_meta($job_id, 'users_applied', $users_applied);
+
+    return [
+      'success' =>  true,
+      'message' => __('Job applied successfully', 'dcjb'),
+      'data' => array(
+        'job_id' => $job_id,
+        'user_id' => get_current_user_id()
+      ),
+    ];
+  }
+
+  /**
+   * Add custom columns to job post type
+   * Hooked via filter manage_job_posts_columns, priority 10
+   * @since 1.0.0
+   * @param array $columns
+   * @return array
+   */
+  public function add_columns(array $columns)
+  {
+    unset($columns['date']);
+    $columns['author'] = __('Owner', 'dcjb');
+    $columns['users_applied'] = __('Users Applied', 'dcjb');
+    $columns['date'] = __('Date', 'dcjb');
+    return $columns;
+  }
+
+  /**
+   * Display custom columns content
+   * Hooked via action manage_job_posts_custom_column, priority 10
+   * @since 1.0.0
+   * @param string $column
+   * @param int $post_id
+   * @return void
+   */
+  public function add_columns_content(string $column, int $post_id)
+  {
+
+    switch ($column):
+      case 'users_applied':
+        $users_applied = get_post_meta($post_id, 'users_applied', true);
+        do_action('qm/info', $users_applied);
+        if (is_array($users_applied)) :
+
+          echo count($users_applied);
+        else :
+          echo 0;
+        endif;
+
+        break;
+
+      case 'author':
+        $author_id = get_post_field('post_author', $post_id);
+        $author = get_user_by('id', $author_id);
+        echo $author->display_name;
+        break;
+
+    endswitch;
   }
 }

@@ -113,4 +113,41 @@ class User
     $wp_roles->add_cap(DCJB_ROLE_CANDIDATE, 'read_job');
     $wp_roles->add_cap(DCJB_ROLE_CANDIDATE, 'apply_job');
   }
+
+  /**
+   * Add custom columns to user list
+   * Hooked via filter manage_users_columns, priority 10
+   * @since   1.0.0
+   * @param   array $columns
+   * @return  array
+   */
+  public function add_columns(array $columns)
+  {
+    $columns['jobs_applied'] = 'Jobs Applied';
+    return $columns;
+  }
+
+  /**
+   * Display custom columns content
+   * Hooked via filter manage_users_custom_column, priority 10
+   * @since   1.0.0
+   * @param   string $display
+   * @param   string $column
+   * @param   int $user_id
+   * @return  string
+   */
+  public function add_columns_content($display, $column, $user_id)
+  {
+    switch ($column):
+      case 'jobs_applied':
+        $jobs_applied = get_user_meta($user_id, 'jobs_applied', true);
+        if (is_array($jobs_applied) && count($jobs_applied) > 0) :
+          $display = count($jobs_applied);
+        else :
+          $display = 0;
+        endif;
+        break;
+    endswitch;
+    return $display;
+  }
 }
