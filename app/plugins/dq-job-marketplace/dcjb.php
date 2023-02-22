@@ -26,8 +26,8 @@
  */
 
 // If this file is called directly, abort.
-if ( ! defined( 'WPINC' ) ) {
-	die;
+if (!defined('WPINC')) {
+  die;
 }
 
 /**
@@ -35,34 +35,43 @@ if ( ! defined( 'WPINC' ) ) {
  * Start at version 1.0.0 and use SemVer - https://semver.org
  * Rename this for your plugin and update it as you release new versions.
  */
-define( 'DCJB_VERSION', '1.0.0' );
+define('DCJB_VERSION', '1.0.0');
+define('DCJB_PLUGIN_DIR', plugin_dir_path(__FILE__));
+define('DCJB_PLUGIN_URL', plugin_dir_url(__FILE__));
+
+define('DCJB_CPT_JOB', 'job');
+
+define('DCJB_ROLE_EMPLOYER', 'employer');
+define('DCJB_ROLE_CANDIDATE', 'candidate');
 
 /**
  * The code that runs during plugin activation.
  * This action is documented in includes/class-dcjb-activator.php
  */
-function activate_dcjb() {
-	require_once plugin_dir_path( __FILE__ ) . 'includes/class-dcjb-activator.php';
-	Dcjb_Activator::activate();
+function activate_dcjb()
+{
+  require_once plugin_dir_path(__FILE__) . 'includes/class-dcjb-activator.php';
+  Dcjb_Activator::activate();
 }
 
 /**
  * The code that runs during plugin deactivation.
  * This action is documented in includes/class-dcjb-deactivator.php
  */
-function deactivate_dcjb() {
-	require_once plugin_dir_path( __FILE__ ) . 'includes/class-dcjb-deactivator.php';
-	Dcjb_Deactivator::deactivate();
+function deactivate_dcjb()
+{
+  require_once plugin_dir_path(__FILE__) . 'includes/class-dcjb-deactivator.php';
+  Dcjb_Deactivator::deactivate();
 }
 
-register_activation_hook( __FILE__, 'activate_dcjb' );
-register_deactivation_hook( __FILE__, 'deactivate_dcjb' );
+register_activation_hook(__FILE__, 'activate_dcjb');
+register_deactivation_hook(__FILE__, 'deactivate_dcjb');
 
 /**
  * The core plugin class that is used to define internationalization,
  * admin-specific hooks, and public-facing site hooks.
  */
-require plugin_dir_path( __FILE__ ) . 'includes/class-dcjb.php';
+require plugin_dir_path(__FILE__) . 'includes/class-dcjb.php';
 
 /**
  * Begins execution of the plugin.
@@ -73,10 +82,10 @@ require plugin_dir_path( __FILE__ ) . 'includes/class-dcjb.php';
  *
  * @since    1.0.0
  */
-function run_dcjb() {
+function run_dcjb()
+{
 
-	$plugin = new Dcjb();
-	$plugin->run();
-
+  $plugin = new Dcjb();
+  $plugin->run();
 }
 run_dcjb();
